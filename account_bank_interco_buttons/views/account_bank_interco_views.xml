@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <!-- Inherit the OCA reconcile form for bank statement lines -->
   <record id="view_bank_stmt_line_reconcile_inherit_interco" model="ir.ui.view">
     <field name="name">account.bank.statement.line.reconcile.interco</field>
     <field name="model">account.bank.statement.line</field>
-    <field name="inherit_id" ref="account.bank.statement.line.reconcile"/>
+    <field name="inherit_id" ref="account_reconcile_oca.account_bank_statement_line_reconcile"/>
     <field name="arch" type="xml">
-      <!-- Add our button into the statusbar buttons -->
       <xpath expr="//form//div[@class='o_form_statusbar o_account_reconcile_oca_statusbar']/div[@class='o_statusbar_buttons']" position="inside">
         <button name="action_open_interco_allocate_wizard"
                 type="object"
@@ -14,8 +12,6 @@
                 class="btn btn-secondary mx-1"
                 attrs="{'invisible': ['|', ('is_reconciled','=', True), ('can_reconcile','=', False)]}"/>
       </xpath>
-
-      <!-- Add an extra page in the notebook to show linked intercompany moves -->
       <xpath expr="//form/notebook" position="inside">
         <page name="interco_moves" string="Intercompany">
           <field name="interco_move_ids" widget="many2many_tags"/>
