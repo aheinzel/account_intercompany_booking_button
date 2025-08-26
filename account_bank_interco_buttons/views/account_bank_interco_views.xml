@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <!-- Inherit the Bank Statement form and inject a per-line button in the lines tree -->
-  <record id="view_bank_statement_form_inherit_interco_button" model="ir.ui.view">
-    <field name="name">account.bank.statement.form.interco.button</field>
-    <field name="model">account.bank.statement</field>
-    <field name="inherit_id" ref="account.view_bank_statement_form"/>
+  <!-- Inherit the Bank Statement LINE form: reliable place to add the button -->
+  <record id="view_bank_statement_line_form_inherit_interco" model="ir.ui.view">
+    <field name="name">account.bank.statement.line.form.interco</field>
+    <field name="model">account.bank.statement.line</field>
+    <field name="inherit_id" ref="account.view_bank_statement_line_form"/>
     <field name="arch" type="xml">
-      <!-- Add a per-row object button into the line tree (works even if inline-edit) -->
-      <xpath expr="//field[@name='line_ids']//tree" position="inside">
+      <!-- Add header button to launch the wizard -->
+      <xpath expr="//header" position="inside">
         <button name="action_open_interco_allocate_wizard"
                 type="object"
-                string="Inter‑co allocate"
-                icon="fa-random"
-                attrs="{'invisible': [('state','=','reconciled')]}"/>
+                string="Inter-co allocate"
+                class="oe_highlight"/>
+      </xpath>
+      <!-- Add a tab to show linked intercompany moves -->
+      <xpath expr="//sheet/notebook" position="inside">
+        <page string="Intercompany">
+          <field name="interco_move_ids" widget="many2many_tags"/>
+        </page>
       </xpath>
     </field>
   </record>
