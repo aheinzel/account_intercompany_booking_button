@@ -216,14 +216,16 @@ class IntercoAllocateWizardLine(models.TransientModel):
     # Source accounts (scoped to src_company_id)
     src_expense_account_id = fields.Many2one(
         "account.account",
-        string="Source Expense",
-        required=True,
-        domain="[('deprecated','=', False), ('company_id', '=', src_company_id)]",
+        string="Source Expense", required=True,
+    )
+, ('company_id', '=', src_company_id)]",
         context="{'allowed_company_ids':[src_company_id]}",
     )
     src_interco_ar_account_id = fields.Many2one(
         "account.account",
-        string="Source Interco AR (Forderungen)",
+        string="Source Interco AR (Forderungen)", required=True,
+    )
+",
         required=True,
         domain="[('deprecated','=', False), ('company_id', '=', src_company_id)]",
         context="{'allowed_company_ids':[src_company_id]}",
@@ -231,21 +233,26 @@ class IntercoAllocateWizardLine(models.TransientModel):
     src_journal_id = fields.Many2one(
         "account.journal",
         string="Source Journal",
-        domain="[('type','in', ['general','bank','cash']), ('company_id', '=', src_company_id)]",
+    )
+, ('company_id', '=', src_company_id)]",
         context="{'allowed_company_ids':[src_company_id]}",
     )
 
     # Destination accounts (scoped to company_id)
     dst_expense_account_id = fields.Many2one(
         "account.account",
-        string="Dest Expense (e.g., Groceries)",
+        string="Dest Expense (e.g., Groceries)", required=True,
+    )
+",
         required=True,
         domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
         context="{'allowed_company_ids':[company_id]}",
     )
     dst_interco_ap_account_id = fields.Many2one(
         "account.account",
-        string="Dest Interco AP (Verbindlichkeiten)",
+        string="Dest Interco AP (Verbindlichkeiten)", required=True,
+    )
+",
         required=True,
         domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
         context="{'allowed_company_ids':[company_id]}",
@@ -253,7 +260,8 @@ class IntercoAllocateWizardLine(models.TransientModel):
     dst_journal_id = fields.Many2one(
         "account.journal",
         string="Dest Journal",
-        domain="[('type','in', ['general','bank','cash']), ('company_id', '=', company_id)]",
+    )
+, ('company_id', '=', company_id)]",
         context="{'allowed_company_ids':[company_id]}",
     )
 
