@@ -6,5 +6,5 @@ class ResConfigSettings(models.TransientModel):
     interco_quickbuttons_enabled = fields.Boolean(
         string='Intercompany Quick Buttons',
         config_parameter='account_interco_quickbuttons.enabled',
-        help='Show one-click intercompany booking wizard on bank statement lines.'
+        help='Show one-click intercompany booking wizard on bank statement-linked journal entries.'
     )

@@ -3,7 +3,7 @@
   <record id="view_bank_stmt_line_form_inherit_interco_quick" model="ir.ui.view">
     <field name="name">account.bank.statement.line.form.interco.quick</field>
     <field name="model">account.bank.statement.line</field>
-    <field name="inherit_id" ref="account.view_bank_stmt_line_form"/>
+    <field name="inherit_id" ref="account.view_bank_statement_line_form"/>
     <field name="arch" type="xml">
       <xpath expr="//header" position="inside">
         <button name="%(action_open_interco_quick_wizard)d" type="action" string="Quick interco booking" class="oe_highlight"/>
