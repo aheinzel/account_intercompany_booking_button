@@ -11,7 +11,7 @@
     <field name="binding_type">action</field>
   </record>
 
-  <!-- Precise inherit of your reconcile view -->
+  <!-- Precise inherit of reconcile view; use 'invisible' instead of deprecated 'attrs' -->
   <record id="view_bank_stmt_line_reconcile_inherit_interco" model="ir.ui.view">
     <field name="name">account.bank.statement.line.reconcile.interco</field>
     <field name="model">account.bank.statement.line</field>
@@ -22,7 +22,7 @@
                 type="object"
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
-                attrs="{'invisible': ['|', ('is_reconciled','=', True), ('can_reconcile','=', False)]}"/>
+                invisible="is_reconciled or not can_reconcile"/>
       </xpath>
       <xpath expr="//notebook" position="inside">
         <page name="interco_moves" string="Intercompany">
