@@ -7,8 +7,7 @@
     <field name="inherit_id" ref="account_reconcile_oca.bank_statement_line_form_reconcile_view"/>
     <field name="arch" type="xml">
       <xpath expr="//div[contains(@class,'o_account_reconcile_oca_statusbar')]//div[contains(@class,'o_statusbar_buttons')]" position="inside">
-        <button name="action_open_interco_allocate_wizard"
-                type="object"
+        <button name="%(action_open_interco_allocate_wizard)d" type="action"
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
                 invisible="is_reconciled"/>
