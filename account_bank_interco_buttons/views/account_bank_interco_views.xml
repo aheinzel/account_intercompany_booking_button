@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+<!-- Window action to open the interco wizard (uses active_id) -->
+<record id="action_open_interco_allocate_wizard" model="ir.actions.act_window">
+  <field name="name">Inter-co allocate</field>
+  <field name="res_model">interco.allocate.wizard</field>
+  <field name="view_mode">form</field>
+  <field name="target">new</field>
+  <field name="context">{'default_statement_line_id': active_id}</field>
+</record>
+
   <!-- Inherit reconcile view: add allocate + view buttons in statusbar -->
   <record id="view_bank_stmt_line_reconcile_inherit_interco" model="ir.ui.view">
     <field name="name">account.bank.statement.line.reconcile.interco</field>
@@ -7,7 +16,7 @@
     <field name="inherit_id" ref="account_reconcile_oca.bank_statement_line_form_reconcile_view"/>
     <field name="arch" type="xml">
       <xpath expr="//div[contains(@class,'o_account_reconcile_oca_statusbar')]//div[contains(@class,'o_statusbar_buttons')]" position="inside">
-        <button name="%(action_open_interco_allocate_wizard)d" type="action"
+        <button name="%(account_bank_interco_buttons.action_open_interco_allocate_wizard)d" type="action"
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
                 invisible="is_reconciled"/>
