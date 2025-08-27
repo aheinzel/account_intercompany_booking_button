@@ -41,7 +41,7 @@ class AccountBankStatementLine(models.Model):
             'name': _("Journal Entries"),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('id', 'in', self.interco_move_ids.ids)],
             'context': {'default_journal_id': self.journal_id.id},
         }

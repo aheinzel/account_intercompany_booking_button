@@ -11,7 +11,7 @@
                 type="object"
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
-                invisible="is_reconciled or not can_reconcile"/>
+                invisible="is_reconciled"/>
         <button name="action_view_interco_moves"
                 type="object"
                 class="btn btn-outline-info mx-1">
