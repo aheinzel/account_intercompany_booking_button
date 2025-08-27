@@ -41,51 +41,6 @@ action = {
     </field>
   </record>
 
-<record id="view_interco_allocate_wizard_form_base" model="ir.ui.view">
-  <field name="name">interco.allocate.wizard.form.base</field>
-  <field name="model">interco.allocate.wizard</field>
-  <field name="arch" type="xml">
-    <form string="Intercompany Allocation">
-      <sheet>
-        <group>
-          <group>
-            <field name="statement_line_id" readonly="1"/>
-            <field name="amount"/>
-            <field name="currency_id"/>
-            <field name="ref_text" placeholder="e.g., Billa Einkauf / Split"/>
-          </group>
-          <group>
-            <field name="reconcile_mode"/>
-            <field name="clearing_account_id"/>
-            <field name="attach_file" filename="attach_filename"/>
-            <field name="attach_filename"/>
-          </group>
-        </group>
-        <group string="Allocations">
-          <field name="line_ids">
-            <tree editable="bottom">
-              <field name="company_id"/>
-              <field name="percent"/>
-              <field name="src_expense_account_id"/>
-              <field name="src_interco_ar_account_id"/>
-              <field name="src_journal_id"/>
-              <field name="dst_expense_account_id"/>
-              <field name="dst_interco_ap_account_id"/>
-              <field name="dst_journal_id"/>
-            </tree>
-          </field>
-        </group>
-      </sheet>
-      <footer>
-        <button string="Create moves" type="object" name="action_create_moves" class="btn-primary"/>
-        <button string="Cancel" class="btn-secondary" special="cancel"/>
-      </footer>
-    </form>
-  </field>
-</record>
-
-
-
 <!-- Inherit wizard form to enforce per-company domains/contexts -->
 <record id="view_interco_allocate_wizard_form_inherit_company_domains" model="ir.ui.view">
   <field name="name">interco.allocate.wizard.form.company.domains</field>
@@ -119,4 +74,75 @@ action = {
   </field>
 </record>
 
+
+<record id="view_interco_allocate_line_tree" model="ir.ui.view">
+  <field name="name">interco.allocate.wizard.line.tree</field>
+  <field name="model">interco.allocate.wizard.line</field>
+  <field name="arch" type="xml">
+    <tree editable="bottom">
+      <field name="company_id"/>
+      <field name="percent"/>
+      <field name="src_expense_account_id" domain="[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+      <field name="src_interco_ar_account_id" domain="[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+      <field name="src_journal_id" domain="[('type','in', ['general','bank','cash']), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+      <field name="dst_expense_account_id" domain="[('deprecated','=',False), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+      <field name="dst_interco_ap_account_id" domain="[('deprecated','=',False), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+      <field name="dst_journal_id" domain="[('type','in', ['general','bank','cash']), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+    </tree>
+  </field>
+</record>
+<record id="view_interco_allocate_line_form" model="ir.ui.view">
+  <field name="name">interco.allocate.wizard.line.form</field>
+  <field name="model">interco.allocate.wizard.line</field>
+  <field name="arch" type="xml">
+    <form string="Allocation line">
+      <group>
+        <field name="company_id"/>
+        <field name="percent"/>
+      </group>
+      <group string="Source (statement company)">
+        <field name="src_journal_id" domain="[('type','in', ['general','bank','cash']), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+        <field name="src_expense_account_id" domain="[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+        <field name="src_interco_ar_account_id" domain="[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]" context="{'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+      </group>
+      <group string="Destination (target company)">
+        <field name="dst_journal_id" domain="[('type','in', ['general','bank','cash']), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+        <field name="dst_expense_account_id" domain="[('deprecated','=',False), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+        <field name="dst_interco_ap_account_id" domain="[('deprecated','=',False), ('company_id', '=', company_id.id)]" context="{'allowed_company_ids':[company_id.id]}"/>
+      </group>
+    </form>
+  </field>
+</record>
+<record id="view_interco_allocate_wizard_form_base" model="ir.ui.view">
+  <field name="name">interco.allocate.wizard.form.base</field>
+  <field name="model">interco.allocate.wizard</field>
+  <field name="arch" type="xml">
+    <form string="Intercompany Allocation">
+      <sheet>
+        <group>
+          <group>
+            <field name="statement_line_id" readonly="1"/>
+            <field name="amount"/>
+            <field name="currency_id"/>
+            <field name="ref_text" placeholder="e.g., Billa Einkauf / Split"/>
+          </group>
+          <group>
+            <field name="reconcile_mode"/>
+            <field name="clearing_account_id"/>
+            <field name="attach_file" filename="attach_filename"/>
+            <field name="attach_filename"/>
+          </group>
+        </group>
+        <group string="Allocations">
+          <field name="line_ids" mode="tree,form"
+                 context="{'form_view_ref':'account_bank_interco_buttons.view_interco_allocate_line_form', 'tree_view_ref':'account_bank_interco_buttons.view_interco_allocate_line_tree'}"/>
+        </group>
+      </sheet>
+      <footer>
+        <button string="Create moves" type="object" name="action_create_moves" class="btn-primary"/>
+        <button string="Cancel" class="btn-secondary" special="cancel"/>
+      </footer>
+    </form>
+  </field>
+</record>
 </odoo>
