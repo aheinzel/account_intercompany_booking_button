@@ -42,39 +42,6 @@ action = {
   </record>
 
 <!-- Inherit wizard form to enforce per-company domains/contexts -->
-<record id="view_interco_allocate_wizard_form_inherit_company_domains" model="ir.ui.view">
-  <field name="name">interco.allocate.wizard.form.company.domains</field>
-  <field name="model">interco.allocate.wizard</field>
-  <field name="inherit_id" ref="account_bank_interco_buttons.view_interco_allocate_wizard_form_base"/>
-  <field name="arch" type="xml">
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='src_expense_account_id']" position="attributes">
-      <attribute name="domain">[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[parent.statement_line_id.company_id.id.id]}</attribute>
-    </xpath>
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='src_interco_ar_account_id']" position="attributes">
-      <attribute name="domain">[('deprecated','=',False), ('company_id', '=', parent.statement_line_id.company_id.id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[parent.statement_line_id.company_id.id.id]}</attribute>
-    </xpath>
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='src_journal_id']" position="attributes">
-      <attribute name="domain">[('type','in', ['general','bank','cash']), ('company_id', '=', parent.statement_line_id.company_id.id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[parent.statement_line_id.company_id.id.id]}</attribute>
-    </xpath>
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='dst_expense_account_id']" position="attributes">
-      <attribute name="domain">[('deprecated','=',False), ('company_id', '=', company_id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[company_id.id]}</attribute>
-    </xpath>
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='dst_interco_ap_account_id']" position="attributes">
-      <attribute name="domain">[('deprecated','=',False), ('company_id', '=', company_id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[company_id.id]}</attribute>
-    </xpath>
-    <xpath expr="//field[@name='line_ids']/tree/field[@name='dst_journal_id']" position="attributes">
-      <attribute name="domain">[('type','in', ['general','bank','cash']), ('company_id', '=', company_id)]</attribute>
-      <attribute name="context">{'allowed_company_ids':[company_id.id]}</attribute>
-    </xpath>
-  </field>
-</record>
-
-
 <record id="view_interco_allocate_line_tree" model="ir.ui.view">
   <field name="name">interco.allocate.wizard.line.tree</field>
   <field name="model">interco.allocate.wizard.line</field>
