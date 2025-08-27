@@ -1,1 +1,21 @@
-# (same as before)
+
+<odoo>
+  <record id="view_bank_stmt_line_form_inherit_interco_quick" model="ir.ui.view">
+    <field name="name">account.bank.statement.line.form.interco.quick</field>
+    <field name="model">account.bank.statement.line</field>
+    <field name="inherit_id" ref="account.view_bank_statement_line_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//header" position="inside">
+        <button name="%(action_open_interco_quick_wizard)d" type="action" string="Quick interco booking" class="oe_highlight"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="action_open_interco_quick_wizard" model="ir.actions.act_window">
+    <field name="name">Quick Interco Booking</field>
+    <field name="res_model">interco.quick.run</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="context">{'default_statement_line_id': active_id}</field>
+  </record>
+</odoo>

@@ -1,1 +1,20 @@
-# (same as before)
+
+<odoo>
+  <record id="view_interco_quick_run_form" model="ir.ui.view">
+    <field name="name">interco.quick.run.form</field>
+    <field name="model">interco.quick.run</field>
+    <field name="arch" type="xml">
+      <form string="Quick Interco Booking">
+        <group>
+          <field name="template"/>
+          <field name="ref"/>
+          <field name="statement_line_id" invisible="1"/>
+        </group>
+        <footer>
+          <button string="Post Entries" type="object" name="action_run" class="btn-primary"/>
+          <button string="Cancel" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>
