@@ -1,7 +1,7 @@
 
 {
     'name': 'Account Interco Quick Buttons',
-    'version': '18.0.0.4.7',
+    'version': '18.0.0.4.8',
     'category': 'Accounting',
     'summary': 'Quick fixed intercompany postings (Food/Childcare)',
     'depends': ['account'],
@@ -20,5 +20,8 @@
         ],
     }
 ,
+    'post_init_hook': 'post_init_hook'
+,
+    'pre_init_hook': 'pre_init_hook',
     'post_init_hook': 'post_init_hook'
 }
