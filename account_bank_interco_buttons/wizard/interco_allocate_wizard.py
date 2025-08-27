@@ -203,44 +203,57 @@ class IntercoAllocateWizard(models.TransientModel):
 
 
 class IntercoAllocateWizardLine(models.TransientModel):
-    # Source company helper (related)
     _name = "interco.allocate.wizard.line"
     _description = "Per-company allocation row"
 
     wizard_id = fields.Many2one("interco.allocate.wizard", required=True, ondelete="cascade")
-    src_company_id = fields.Many2one('res.company', string='Source Company', related='wizard_id.statement_line_id.company_id', readonly=True)
-    company_id = fields.Many2one("res.company", required=True)
+    company_id = fields.Many2one("res.company", required=True, string="Destination Company")
     percent = fields.Float(required=True, default=100.0, help="Share of base amount (must sum to 100 across lines)")
 
-    # Source accounts
-    src_expense_account_id = fields.Many2one("account.account", string="Source Expense", required=True, domain=[('deprecated', '=', False)])
-    src_interco_ar_account_id = fields.Many2one("account.account", string="Source Interco AR (Forderungen)", required=True, domain=[('deprecated', '=', False)])
-    src_journal_id = fields.Many2one("account.journal", string="Source Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])
+    # Helper: source company from the statement line
+    src_company_id = fields.Many2one('res.company', related='wizard_id.statement_line_id.company_id', store=False, readonly=True)
 
-    # Destination accounts
-    dst_expense_account_id = fields.Many2one("account.account", string="Dest Expense (e.g., Groceries)", required=True, domain=[('deprecated', '=', False)])
-    dst_interco_ap_account_id = fields.Many2one("account.account", string="Dest Interco AP (Verbindlichkeiten)", required=True, domain=[('deprecated', '=', False)])
-    dst_journal_id = fields.Many2one("account.journal", string="Dest Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])
+    # Source accounts (scoped to src_company_id)
+    src_expense_account_id = fields.Many2one(
+        "account.account",
+        string="Source Expense",
+        required=True,
+        domain="[('deprecated','=', False), ('company_id', '=', src_company_id)]",
+        context="{'allowed_company_ids':[src_company_id]}",
+    )
+    src_interco_ar_account_id = fields.Many2one(
+        "account.account",
+        string="Source Interco AR (Forderungen)",
+        required=True,
+        domain="[('deprecated','=', False), ('company_id', '=', src_company_id)]",
+        context="{'allowed_company_ids':[src_company_id]}",
+    )
+    src_journal_id = fields.Many2one(
+        "account.journal",
+        string="Source Journal",
+        domain="[('type','in', ['general','bank','cash']), ('company_id', '=', src_company_id)]",
+        context="{'allowed_company_ids':[src_company_id]}",
+    )
 
-@api.onchange('company_id', 'src_company_id')
-def _onchange_set_domains(self):
-    for line in self:
-        src_co = line.src_company_id.id if line.src_company_id else False
-        dst_co = line.company_id.id if line.company_id else False
-        line_domain = {
-            'src_expense_account_id': [('deprecated', '=', False)],
-            'src_interco_ar_account_id': [('deprecated', '=', False)],
-            'src_journal_id': [('type','in', ['general','bank','cash'])],
-            'dst_expense_account_id': [('deprecated', '=', False)],
-            'dst_interco_ap_account_id': [('deprecated', '=', False)],
-            'dst_journal_id': [('type','in', ['general','bank','cash'])],
-        }
-        if src_co:
-            line_domain['src_expense_account_id'].append(('company_id', '=', src_co))
-            line_domain['src_interco_ar_account_id'].append(('company_id', '=', src_co))
-            line_domain['src_journal_id'].append(('company_id', '=', src_co))
-        if dst_co:
-            line_domain['dst_expense_account_id'].append(('company_id', '=', dst_co))
-            line_domain['dst_interco_ap_account_id'].append(('company_id', '=', dst_co))
-            line_domain['dst_journal_id'].append(('company_id', '=', dst_co))
-        return {'domain': line_domain}
+    # Destination accounts (scoped to company_id)
+    dst_expense_account_id = fields.Many2one(
+        "account.account",
+        string="Dest Expense (e.g., Groceries)",
+        required=True,
+        domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
+        context="{'allowed_company_ids':[company_id]}",
+    )
+    dst_interco_ap_account_id = fields.Many2one(
+        "account.account",
+        string="Dest Interco AP (Verbindlichkeiten)",
+        required=True,
+        domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
+        context="{'allowed_company_ids':[company_id]}",
+    )
+    dst_journal_id = fields.Many2one(
+        "account.journal",
+        string="Dest Journal",
+        domain="[('type','in', ['general','bank','cash']), ('company_id', '=', company_id)]",
+        context="{'allowed_company_ids':[company_id]}",
+    )
+
