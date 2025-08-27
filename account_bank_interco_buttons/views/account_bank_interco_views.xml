@@ -49,9 +49,9 @@ action = {
     <list editable="bottom">
       <field name="company_id"/>
       <field name="percent"/>
-      <field name="src_expense_account_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
-      <field name="src_interco_ar_account_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
-      <field name="src_journal_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+      <field name="src_expense_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
+      <field name="src_interco_ar_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
+      <field name="src_journal_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
       <field name="dst_expense_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
       <field name="dst_interco_ap_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
       <field name="dst_journal_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
@@ -68,9 +68,9 @@ action = {
         <field name="percent"/>
       </group>
       <group string="Source (statement company)">
-        <field name="src_journal_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
-        <field name="src_expense_account_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
-        <field name="src_interco_ar_account_id" context="{'company_id': parent.statement_line_id.company_id.id, 'allowed_company_ids':[parent.statement_line_id.company_id.id]}"/>
+        <field name="src_journal_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
+        <field name="src_expense_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
+        <field name="src_interco_ar_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
       </group>
       <group string="Destination (target company)">
         <field name="dst_journal_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
