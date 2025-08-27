@@ -49,12 +49,12 @@ action = {
     <list editable="bottom">
       <field name="company_id"/>
       <field name="percent"/>
-      <field name="src_expense_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
-      <field name="src_interco_ar_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
-      <field name="src_journal_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
-      <field name="dst_expense_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
-      <field name="dst_interco_ap_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
-      <field name="dst_journal_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
+      <field name="src_expense_account_id"/>
+      <field name="src_interco_ar_account_id"/>
+      <field name="src_journal_id"/>
+      <field name="dst_expense_account_id"/>
+      <field name="dst_interco_ap_account_id"/>
+      <field name="dst_journal_id"/>
     </list>
   </field>
 </record>
@@ -68,14 +68,14 @@ action = {
         <field name="percent"/>
       </group>
       <group string="Source (statement company)">
-        <field name="src_journal_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
-        <field name="src_expense_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
-        <field name="src_interco_ar_account_id" context="{'company_id': src_company_id.id, 'allowed_company_ids':[src_company_id.id]}"/>
+        <field name="src_journal_id"/>
+        <field name="src_expense_account_id"/>
+        <field name="src_interco_ar_account_id"/>
       </group>
       <group string="Destination (target company)">
-        <field name="dst_journal_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
-        <field name="dst_expense_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
-        <field name="dst_interco_ap_account_id" context="{'company_id': company_id.id, 'allowed_company_ids':[company_id.id]}"/>
+        <field name="dst_journal_id"/>
+        <field name="dst_expense_account_id"/>
+        <field name="dst_interco_ap_account_id"/>
       </group>
     </form>
   </field>
@@ -102,7 +102,7 @@ action = {
         </group>
         <group string="Allocations">
           <field name="line_ids" mode="list,form"
-                 context="{'form_view_ref':'account_bank_interco_buttons.view_interco_allocate_line_form', 'tree_view_ref':'account_bank_interco_buttons.view_interco_allocate_line_tree'}"/>
+                />
         </group>
       </sheet>
       <footer>
