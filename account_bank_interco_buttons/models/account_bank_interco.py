@@ -18,22 +18,28 @@ class AccountBankStatementLine(models.Model):
         for rec in self:
             rec.interco_move_count = len(rec.interco_move_ids)
 
-    def action_open_interco_allocate_wizard(self):
-        self.ensure_one()
-        if getattr(self, 'is_reconciled', False):
-            raise UserError(_("This statement line is already reconciled."))
-        return {
-            'name': _('Inter-co allocate'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'interco.allocate.wizard',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {
-                'default_statement_line_id': self.id,
-                'default_amount': abs(getattr(self, 'amount', 0.0) or getattr(self, 'balance', 0.0)),
-                'default_currency_id': self.currency_id.id or self.journal_id.currency_id.id or self.company_id.currency_id.id,
-            , 'allowed_company_ids': self.env.user.company_ids.ids},
-        }
+    
+def action_open_interco_allocate_wizard(self):
+    self.ensure_one()
+    if getattr(self, 'is_reconciled', False):
+        raise UserError(_("This statement line is already reconciled."))
+    return {
+        'name': _('Inter-co allocate'),
+        'type': 'ir.actions.act_window',
+        'res_model': 'interco.allocate.wizard',
+        'view_mode': 'form',
+        'target': 'new',
+        'context': {
+            'default_statement_line_id': self.id,
+            'default_amount': abs(getattr(self, 'amount', 0.0) or getattr(self, 'balance', 0.0)),
+            'default_currency_id': (
+                self.currency_id.id
+                or self.journal_id.currency_id.id
+                or self.company_id.currency_id.id
+            ),
+            'allowed_company_ids': self.env.user.company_ids.ids,
+        },
+    }
 
     def action_view_interco_moves(self):
         self.ensure_one()
