@@ -1,7 +1,7 @@
 
 {
     'name': 'Account Interco Quick Buttons',
-    'version': '18.0.0.4.3',
+    'version': '18.0.0.4.5',
     'category': 'Accounting',
     'summary': 'Quick fixed intercompany postings (Food/Childcare)',
     'depends': ['account'],
@@ -19,4 +19,6 @@
             'account_interco_quickbuttons/static/src/js/reconcile_quickbutton.js',
         ],
     }
+,
+    'post_init_hook': 'post_init_hook'
 }
