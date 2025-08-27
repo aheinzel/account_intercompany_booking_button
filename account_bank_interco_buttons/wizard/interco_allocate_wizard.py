@@ -257,3 +257,27 @@ class IntercoAllocateWizardLine(models.TransientModel):
         context="{'allowed_company_ids':[company_id]}",
     )
 
+
+
+@api.onchange('company_id', 'src_company_id')
+def _onchange_set_domains(self):
+    for line in self:
+        src_co = line.src_company_id.id if line.src_company_id else False
+        dst_co = line.company_id.id if line.company_id else False
+        dom = {
+            'src_expense_account_id': [('deprecated', '=', False)],
+            'src_interco_ar_account_id': [('deprecated', '=', False)],
+            'src_journal_id': [('type','in', ['general','bank','cash'])],
+            'dst_expense_account_id': [('deprecated', '=', False)],
+            'dst_interco_ap_account_id': [('deprecated', '=', False)],
+            'dst_journal_id': [('type','in', ['general','bank','cash'])],
+        }
+        if src_co:
+            dom['src_expense_account_id'].append(('company_id', '=', src_co))
+            dom['src_interco_ar_account_id'].append(('company_id', '=', src_co))
+            dom['src_journal_id'].append(('company_id', '=', src_co))
+        if dst_co:
+            dom['dst_expense_account_id'].append(('company_id', '=', dst_co))
+            dom['dst_interco_ap_account_id'].append(('company_id', '=', dst_co))
+            dom['dst_journal_id'].append(('company_id', '=', dst_co))
+        return {'domain': dom}
