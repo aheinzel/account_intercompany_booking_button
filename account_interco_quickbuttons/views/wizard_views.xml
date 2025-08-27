@@ -17,4 +17,12 @@
       </form>
     </field>
   </record>
+
+  <record id="action_open_interco_quick_wizard" model="ir.actions.act_window">
+    <field name="name">Quick Interco Booking</field>
+    <field name="res_model">interco.quick.run</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
 </odoo>
+
