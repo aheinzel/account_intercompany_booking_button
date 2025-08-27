@@ -1,14 +1,20 @@
-
 <odoo>
     <record id="res_config_settings_view_form_interco_quick" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.interco.quick</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="inherit_id" ref="base.view_res_config_settings"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div class="app_settings_block" data-string="Intercompany Quick Buttons" string="Intercompany Quick Buttons">
-                    <h2>Intercompany Quick Buttons</h2>
-                    <p>This module provides fixed buttons for Food/Groceries and Childcare intercompany bookings.</p>
+            <xpath expr="//div[contains(@class, 'o_setting_container')]" position="inside">
+                <div class="o_setting">
+                    <div class="o_setting_left_pane">
+                        <field name="interco_quickbuttons_enabled"/>
+                    </div>
+                    <div class="o_setting_right_pane">
+                        <label for="interco_quickbuttons_enabled"/>
+                        <div class="text-muted">
+                            Enable intercompany quick buttons (Food/Groceries, Childcare) on bank statement lines.
+                        </div>
+                    </div>
                 </div>
             </xpath>
         </field>
