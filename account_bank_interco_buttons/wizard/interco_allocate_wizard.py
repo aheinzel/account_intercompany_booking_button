@@ -13,8 +13,7 @@ class IntercoAllocateWizard(models.TransientModel):
     clearing_account_id = fields.Many2one(
         "account.account",
         string="Clearing/Outstanding Expenses Account",
-        help="Account to offset the bank line (e.g., 2802 Bank‑Zwischenkonto or 4890 Outstanding expenses).",
-        domain=[('deprecated', '=', False)]
+        help="Account to offset the bank line (e.g., 2802 Bank‑Zwischenkonto or 4890 Outstanding expenses)."
     )
     reconcile_mode = fields.Selection(
         [
@@ -202,6 +201,7 @@ class IntercoAllocateWizard(models.TransientModel):
         return src_move | dst_move
 
 
+
 class IntercoAllocateWizardLine(models.TransientModel):
     _name = "interco.allocate.wizard.line"
     _description = "Per-company allocation row"
@@ -210,82 +210,40 @@ class IntercoAllocateWizardLine(models.TransientModel):
     company_id = fields.Many2one("res.company", required=True, string="Destination Company")
     percent = fields.Float(required=True, default=100.0, help="Share of base amount (must sum to 100 across lines)")
 
-    # Helper: source company from the statement line
+    # Source company helper (related to the statement line's company)
     src_company_id = fields.Many2one('res.company', related='wizard_id.statement_line_id.company_id', store=False, readonly=True)
 
-    # Source accounts (scoped to src_company_id)
-    src_expense_account_id = fields.Many2one(
-        "account.account",
-        string="Source Expense", required=True,
-    )
-, ('company_id', '=', src_company_id)]",
-        context="{'allowed_company_ids':[src_company_id]}",
-    )
-    src_interco_ar_account_id = fields.Many2one(
-        "account.account",
-        string="Source Interco AR (Forderungen)", required=True,
-    )
-",
-        required=True,
-        domain="[('deprecated','=', False), ('company_id', '=', src_company_id)]",
-        context="{'allowed_company_ids':[src_company_id]}",
-    )
-    src_journal_id = fields.Many2one(
-        "account.journal",
-        string="Source Journal",
-    )
-, ('company_id', '=', src_company_id)]",
-        context="{'allowed_company_ids':[src_company_id]}",
-    )
+    # Source side
+    src_expense_account_id = fields.Many2one("account.account", string="Source Expense", required=True)
+    src_interco_ar_account_id = fields.Many2one("account.account", string="Source Interco AR (Forderungen)", required=True)
+    src_journal_id = fields.Many2one("account.journal", string="Source Journal")
 
-    # Destination accounts (scoped to company_id)
-    dst_expense_account_id = fields.Many2one(
-        "account.account",
-        string="Dest Expense (e.g., Groceries)", required=True,
-    )
-",
-        required=True,
-        domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
-        context="{'allowed_company_ids':[company_id]}",
-    )
-    dst_interco_ap_account_id = fields.Many2one(
-        "account.account",
-        string="Dest Interco AP (Verbindlichkeiten)", required=True,
-    )
-",
-        required=True,
-        domain="[('deprecated','=', False), ('company_id', '=', company_id)]",
-        context="{'allowed_company_ids':[company_id]}",
-    )
-    dst_journal_id = fields.Many2one(
-        "account.journal",
-        string="Dest Journal",
-    )
-, ('company_id', '=', company_id)]",
-        context="{'allowed_company_ids':[company_id]}",
-    )
+    # Destination side
+    dst_expense_account_id = fields.Many2one("account.account", string="Dest Expense (e.g., Groceries)", required=True)
+    dst_interco_ap_account_id = fields.Many2one("account.account", string="Dest Interco AP (Verbindlichkeiten)", required=True)
+    dst_journal_id = fields.Many2one("account.journal", string="Dest Journal")
+
+    @api.onchange('company_id', 'src_company_id')
+    def _onchange_set_domains(self):
+        for line in self:
+            src_co = line.src_company_id.id if line.src_company_id else False
+            dst_co = line.company_id.id if line.company_id else False
+            dom = {
+                'src_expense_account_id': [('deprecated', '=', False)],
+                'src_interco_ar_account_id': [('deprecated', '=', False)],
+                'src_journal_id': [('type','in', ['general','bank','cash'])],
+                'dst_expense_account_id': [('deprecated', '=', False)],
+                'dst_interco_ap_account_id': [('deprecated', '=', False)],
+                'dst_journal_id': [('type','in', ['general','bank','cash'])],
+            }
+            if src_co:
+                dom['src_expense_account_id'].append(('company_id', '=', src_co))
+                dom['src_interco_ar_account_id'].append(('company_id', '=', src_co))
+                dom['src_journal_id'].append(('company_id', '=', src_co))
+            if dst_co:
+                dom['dst_expense_account_id'].append(('company_id', '=', dst_co))
+                dom['dst_interco_ap_account_id'].append(('company_id', '=', dst_co))
+                dom['dst_journal_id'].append(('company_id', '=', dst_co))
+            return {'domain': dom}
 
 
-
-@api.onchange('company_id', 'src_company_id')
-def _onchange_set_domains(self):
-    for line in self:
-        src_co = line.src_company_id.id if line.src_company_id else False
-        dst_co = line.company_id.id if line.company_id else False
-        dom = {
-            'src_expense_account_id': [('deprecated', '=', False)],
-            'src_interco_ar_account_id': [('deprecated', '=', False)],
-            'src_journal_id': [('type','in', ['general','bank','cash'])],
-            'dst_expense_account_id': [('deprecated', '=', False)],
-            'dst_interco_ap_account_id': [('deprecated', '=', False)],
-            'dst_journal_id': [('type','in', ['general','bank','cash'])],
-        }
-        if src_co:
-            dom['src_expense_account_id'].append(('company_id', '=', src_co))
-            dom['src_interco_ar_account_id'].append(('company_id', '=', src_co))
-            dom['src_journal_id'].append(('company_id', '=', src_co))
-        if dst_co:
-            dom['dst_expense_account_id'].append(('company_id', '=', dst_co))
-            dom['dst_interco_ap_account_id'].append(('company_id', '=', dst_co))
-            dom['dst_journal_id'].append(('company_id', '=', dst_co))
-        return {'domain': dom}
