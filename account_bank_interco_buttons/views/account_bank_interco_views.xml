@@ -8,8 +8,25 @@
   <field name="target">new</field>
   <field name="context">{'default_statement_line_id': active_id}</field>
 </record>
+<!-- Server action to open intercompany moves for the active statement line -->
+  <record id="action_view_interco_moves_server" model="ir.actions.server">
+    <field name="name">View Interco Moves</field>
+    <field name="model_id" ref="account.model_account_bank_statement_line"/>
+    <field name="state">code</field>
+    <field name="code"><![CDATA[
+action = {
+    'name': 'Intercompany Moves',
+    'type': 'ir.actions.act_window',
+    'res_model': 'account.move',
+    'view_mode': 'list,form',
+    'domain': [('id', 'in', records.interco_move_ids.ids)],
+}
+return action
+    ]]></field>
+  </record>
 
-  <!-- Inherit reconcile view: add allocate + view buttons in statusbar -->
+<!-- Window action to open the interco wizard (uses active_id) -->
+<!-- Inherit reconcile view: add allocate + view buttons in statusbar -->
   <record id="view_bank_stmt_line_reconcile_inherit_interco" model="ir.ui.view">
     <field name="name">account.bank.statement.line.reconcile.interco</field>
     <field name="model">account.bank.statement.line</field>
@@ -20,11 +37,7 @@
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
                 invisible="is_reconciled"/>
-        <button name="action_view_interco_moves"
-                type="object"
-                class="btn btn-outline-info mx-1">
-          View interco moves (<field name="interco_move_count"/>)
-        </button>
+        <button name="%(account_bank_interco_buttons.action_view_interco_moves_server)d" type="action" class="btn btn-outline-info mx-1" string="View interco moves"/>
       </xpath>
     </field>
   </record>
