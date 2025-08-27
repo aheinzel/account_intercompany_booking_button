@@ -21,8 +21,7 @@ action = {
     'view_mode': 'list,form',
     'domain': [('id', 'in', records.interco_move_ids.ids)],
 }
-return action
-    ]]></field>
+]]></field>
   </record>
 
 <!-- Window action to open the interco wizard (uses active_id) -->
