@@ -32,7 +32,7 @@ class AccountBankStatementLine(models.Model):
                 'default_statement_line_id': self.id,
                 'default_amount': abs(getattr(self, 'amount', 0.0) or getattr(self, 'balance', 0.0)),
                 'default_currency_id': self.currency_id.id or self.journal_id.currency_id.id or self.company_id.currency_id.id,
-            },
+            , 'allowed_company_ids': self.env.user.company_ids.ids},
         }
 
     def action_view_interco_moves(self):
