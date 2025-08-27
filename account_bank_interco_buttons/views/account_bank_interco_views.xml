@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+  <!-- Action menu binding as a robust fallback -->
+  <record id="action_interco_allocate_wizard" model="ir.actions.act_window">
+    <field name="name">Inter-co allocate</field>
+    <field name="res_model">interco.allocate.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="context">{'default_statement_line_id': active_id, 'default_amount': (active.amount or active.balance), 'default_currency_id': (active.currency_id.id or active.journal_id.currency_id.id or active.company_id.currency_id.id)}</field>
+    <field name="binding_model_id" ref="account.model_account_bank_statement_line"/>
+    <field name="binding_type">action</field>
+  </record>
+
+  <!-- Precise inherit of your reconcile view -->
   <record id="view_bank_stmt_line_reconcile_inherit_interco" model="ir.ui.view">
     <field name="name">account.bank.statement.line.reconcile.interco</field>
     <field name="model">account.bank.statement.line</field>
-    <field name="inherit_id" ref="account_reconcile_oca.account_bank_statement_line_reconcile"/>
+    <field name="inherit_id" ref="account_reconcile_oca.bank_statement_line_form_reconcile_view"/>
     <field name="arch" type="xml">
-      <xpath expr="//form//div[@class='o_form_statusbar o_account_reconcile_oca_statusbar']/div[@class='o_statusbar_buttons']" position="inside">
+      <xpath expr="//div[contains(@class,'o_account_reconcile_oca_statusbar')]//div[contains(@class,'o_statusbar_buttons')]" position="inside">
         <button name="action_open_interco_allocate_wizard"
                 type="object"
                 string="Inter-co allocate"
                 class="btn btn-secondary mx-1"
                 attrs="{'invisible': ['|', ('is_reconciled','=', True), ('can_reconcile','=', False)]}"/>
       </xpath>
-      <xpath expr="//form/notebook" position="inside">
+      <xpath expr="//notebook" position="inside">
         <page name="interco_moves" string="Intercompany">
           <field name="interco_move_ids" widget="many2many_tags"/>
         </page>

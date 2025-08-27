@@ -9,7 +9,7 @@ class IntercoAllocateWizard(models.TransientModel):
     amount = fields.Monetary("Base Amount", required=True)
     currency_id = fields.Many2one("res.currency", required=True)
 
-    # Global reference to be applied to created moves
+    # Reference for created moves
     ref_text = fields.Char(string="Reference (ref)")
 
     # Auto-reconciliation support
@@ -29,7 +29,7 @@ class IntercoAllocateWizard(models.TransientModel):
         help="How to offset the bank statement line automatically."
     )
 
-    # Optional attachment to propagate to created moves
+    # Optional attachment to propagate
     attach_file = fields.Binary(string="Attachment")
     attach_filename = fields.Char(string="Filename")
 
@@ -62,7 +62,7 @@ class IntercoAllocateWizard(models.TransientModel):
         if created_moves:
             st_line.interco_move_ids = [(4, m.id) for m in created_moves]
 
-        # Propagate attachment (if any)
+        # Propagate attachment
         if self.attach_file and self.attach_filename:
             for m in created_moves:
                 self.env['ir.attachment'].create({
@@ -73,7 +73,7 @@ class IntercoAllocateWizard(models.TransientModel):
                     'type': 'binary',
                 })
 
-        # Auto-reconcile bank line using a clearing/outstanding-expenses helper move
+        # Auto-reconcile bank line using helper move
         self._auto_offset_and_reconcile(st_line, base_amt)
 
         action = st_line.action_view_journal_entries()
@@ -81,7 +81,7 @@ class IntercoAllocateWizard(models.TransientModel):
             action['domain'] = [('id', 'in', created_moves.ids)]
         return action
 
-    # ------------------------ helpers ------------------------
+    # Helpers
     def _compose_ref(self, suffix: str = ""):
         parts = []
         if self.ref_text:
@@ -91,7 +91,6 @@ class IntercoAllocateWizard(models.TransientModel):
         return " | ".join([p for p in parts if p])
 
     def _auto_offset_and_reconcile(self, st_line, total_amt):
-        """Create a one-off move on the bank journal to mirror the statement amount and balance it to a selected clearing/outstanding account, then attempt to reconcile the statement line."""
         bank_journal = st_line.journal_id
         company = st_line.company_id
         bank_account = bank_journal.default_account_id
@@ -100,7 +99,6 @@ class IntercoAllocateWizard(models.TransientModel):
             return
 
         amount = total_amt
-        # money out (negative amount) -> debit clearing, credit bank; for money in it's the reverse.
         debit, credit = (0.0, amount) if amount > 0 else (abs(amount), 0.0)
 
         move_vals = {
@@ -126,33 +124,25 @@ class IntercoAllocateWizard(models.TransientModel):
         move = self.env['account.move'].with_company(company).create(move_vals)
         move.action_post()
 
-        # Try to reconcile the bank statement line against the bank line of this move
         bank_ml = move.line_ids.filtered(lambda l: l.account_id.id == bank_account.id)
         try:
             if hasattr(st_line, 'process_reconciliation'):
                 st_line.process_reconciliation(new_aml_dicts=[], existing_aml_ids=bank_ml.ids)
         except Exception:
-            # Leave posted move for manual reconciliation if API differs
             pass
 
     def _create_interco_pair(self, st_line, line, alloc_amt):
-        """Create two reclassification moves using explicit accounts and automatic partner assignment.
-        Source company: CREDIT source expense, DEBIT intercompany receivable (Forderungen -> partner = dest company partner).
-        Destination company: DEBIT destination expense (Groceries), CREDIT intercompany payable (Verbindlichkeiten -> partner = source company partner).
-        Also: post a chatter note on the destination move with the bank line description.
-        """
         src_company = st_line.company_id
         dst_company = line.company_id
         if src_company.id == dst_company.id:
             raise UserError(_("Target company cannot be the same as the statement line company."))
 
-        # Resolve company partners
-        src_partner = src_company.partner_id  # e.g., Andreas
-        dst_partner = dst_company.partner_id  # e.g., Household
+        src_partner = src_company.partner_id
+        dst_partner = dst_company.partner_id
         if not src_partner or not dst_partner:
             raise UserError(_("Both companies must have a linked partner (res.partner)."))
 
-        # --- SOURCE MOVE ---
+        # SOURCE MOVE
         src_journal = line.src_journal_id or src_company._get_misc_journal()
         if not src_journal:
             raise UserError(_("No source journal in %s") % src_company.display_name)
@@ -165,14 +155,12 @@ class IntercoAllocateWizard(models.TransientModel):
             'date': fields.Date.context_today(self),
             'company_id': src_company.id,
             'line_ids': [
-                # CREDIT expense (reduce expense that will be borne by Household)
                 (0, 0, {
                     'name': 'Reclass expense to interco',
                     'account_id': line.src_expense_account_id.id,
                     'credit': alloc_amt,
                     'debit': 0.0,
                 }),
-                # DEBIT intercompany receivable (Forderungen Haushalt)
                 (0, 0, {
                     'name': 'Intercompany AR to %s' % dst_company.display_name,
                     'account_id': line.src_interco_ar_account_id.id,
@@ -185,7 +173,7 @@ class IntercoAllocateWizard(models.TransientModel):
         src_move = self.env['account.move'].with_company(src_company).create(src_vals)
         src_move.action_post()
 
-        # --- DEST MOVE ---
+        # DEST MOVE
         dst_journal = line.dst_journal_id or dst_company._get_misc_journal()
         if not dst_journal:
             raise UserError(_("No destination journal in %s") % dst_company.display_name)
@@ -198,7 +186,6 @@ class IntercoAllocateWizard(models.TransientModel):
             'date': fields.Date.context_today(self),
             'company_id': dst_company.id,
             'line_ids': [
-                # DEBIT groceries (expense in Household books) with Kunde = Andreas
                 (0, 0, {
                     'name': 'Groceries (interco)',
                     'account_id': line.dst_expense_account_id.id,
@@ -206,7 +193,6 @@ class IntercoAllocateWizard(models.TransientModel):
                     'credit': 0.0,
                     'partner_id': src_company.partner_id.id,
                 }),
-                # CREDIT intercompany payable to Andreas with Kunde = Andreas
                 (0, 0, {
                     'name': 'Intercompany AP to %s' % src_company.display_name,
                     'account_id': line.dst_interco_ap_account_id.id,
@@ -219,7 +205,7 @@ class IntercoAllocateWizard(models.TransientModel):
         dst_move = self.env['account.move'].with_company(dst_company).create(dst_vals)
         dst_move.action_post()
 
-        # Post a chatter note on destination move with the original bank line description
+        # Chatter note on destination move with original bank line description
         desc = st_line.payment_ref or st_line.name or ''
         if desc:
             dst_move.message_post(body=_('Original bank line description: %s') % desc)
@@ -235,12 +221,12 @@ class IntercoAllocateWizardLine(models.TransientModel):
     company_id = fields.Many2one("res.company", required=True)
     percent = fields.Float(required=True, default=100.0, help="Share of base amount (must sum to 100 across lines)")
 
-    # Source (statement-line company) accounts
+    # Source accounts (statement-line company)
     src_expense_account_id = fields.Many2one("account.account", string="Source Expense", required=True, domain=[('deprecated', '=', False)])
     src_interco_ar_account_id = fields.Many2one("account.account", string="Source Interco AR (Forderungen)", required=True, domain=[('deprecated', '=', False)])
     src_journal_id = fields.Many2one("account.journal", string="Source Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])
 
-    # Destination (target company) accounts
+    # Destination accounts (target company)
     dst_expense_account_id = fields.Many2one("account.account", string="Dest Expense (e.g., Groceries)", required=True, domain=[('deprecated', '=', False)])
     dst_interco_ap_account_id = fields.Many2one("account.account", string="Dest Interco AP (Verbindlichkeiten)", required=True, domain=[('deprecated', '=', False)])
     dst_journal_id = fields.Many2one("account.journal", string="Dest Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])

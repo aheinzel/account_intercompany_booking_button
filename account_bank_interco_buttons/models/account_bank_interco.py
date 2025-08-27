@@ -16,7 +16,8 @@ class AccountBankStatementLine(models.Model):
 
     def action_open_interco_allocate_wizard(self):
         self.ensure_one()
-        if self.state == 'reconciled':
+        # Reconcile view can be opened on posted/unreconciled items only, but keep safety
+        if getattr(self, 'state', False) == 'reconciled':
             raise UserError(_("This statement line is already reconciled."))
         return {
             'name': _('Inter-co allocate'),
