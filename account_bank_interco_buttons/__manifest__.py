@@ -1,7 +1,7 @@
 {
     'name': 'Account Bank Intercompany Buttons',
-    'summary': 'Button on bank statement lines to generate multiple journal entries, including intercompany mirrors, with auto-reconcile and attachments.',
-    'version': '18.0.1.4.1',
+    'summary': 'Statusbar buttons on bank reconcile view to create/view intercompany moves; auto-reconcile and attachments.',
+    'version': '18.0.1.4.4',
     'category': 'Accounting',
     'author': 'Andreas + ChatGPT (GPT-5 Thinking) — educational demo',
     'license': 'LGPL-3',

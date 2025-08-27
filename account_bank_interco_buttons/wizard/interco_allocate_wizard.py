@@ -8,11 +8,8 @@ class IntercoAllocateWizard(models.TransientModel):
     statement_line_id = fields.Many2one("account.bank.statement.line", required=True)
     amount = fields.Monetary("Base Amount", required=True)
     currency_id = fields.Many2one("res.currency", required=True)
-
-    # Reference for created moves
     ref_text = fields.Char(string="Reference (ref)")
 
-    # Auto-reconciliation support
     clearing_account_id = fields.Many2one(
         "account.account",
         string="Clearing/Outstanding Expenses Account",
@@ -26,14 +23,11 @@ class IntercoAllocateWizard(models.TransientModel):
         ],
         default="clearing",
         required=True,
-        help="How to offset the bank statement line automatically."
     )
 
-    # Optional attachment to propagate
     attach_file = fields.Binary(string="Attachment")
     attach_filename = fields.Char(string="Filename")
 
-    # Allocation rows
     line_ids = fields.One2many("interco.allocate.wizard.line", "wizard_id", string="Allocations", required=True)
 
     @api.constrains('line_ids')
@@ -58,11 +52,9 @@ class IntercoAllocateWizard(models.TransientModel):
                 continue
             created_moves |= self._create_interco_pair(st_line, line, alloc_amt)
 
-        # Link back
         if created_moves:
             st_line.interco_move_ids = [(4, m.id) for m in created_moves]
 
-        # Propagate attachment
         if self.attach_file and self.attach_filename:
             for m in created_moves:
                 self.env['ir.attachment'].create({
@@ -73,7 +65,6 @@ class IntercoAllocateWizard(models.TransientModel):
                     'type': 'binary',
                 })
 
-        # Auto-reconcile bank line using helper move
         self._auto_offset_and_reconcile(st_line, base_amt)
 
         action = st_line.action_view_journal_entries()
@@ -81,7 +72,6 @@ class IntercoAllocateWizard(models.TransientModel):
             action['domain'] = [('id', 'in', created_moves.ids)]
         return action
 
-    # Helpers
     def _compose_ref(self, suffix: str = ""):
         parts = []
         if self.ref_text:
@@ -205,7 +195,6 @@ class IntercoAllocateWizard(models.TransientModel):
         dst_move = self.env['account.move'].with_company(dst_company).create(dst_vals)
         dst_move.action_post()
 
-        # Chatter note on destination move with original bank line description
         desc = st_line.payment_ref or st_line.name or ''
         if desc:
             dst_move.message_post(body=_('Original bank line description: %s') % desc)
@@ -221,12 +210,12 @@ class IntercoAllocateWizardLine(models.TransientModel):
     company_id = fields.Many2one("res.company", required=True)
     percent = fields.Float(required=True, default=100.0, help="Share of base amount (must sum to 100 across lines)")
 
-    # Source accounts (statement-line company)
+    # Source accounts
     src_expense_account_id = fields.Many2one("account.account", string="Source Expense", required=True, domain=[('deprecated', '=', False)])
     src_interco_ar_account_id = fields.Many2one("account.account", string="Source Interco AR (Forderungen)", required=True, domain=[('deprecated', '=', False)])
     src_journal_id = fields.Many2one("account.journal", string="Source Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])
 
-    # Destination accounts (target company)
+    # Destination accounts
     dst_expense_account_id = fields.Many2one("account.account", string="Dest Expense (e.g., Groceries)", required=True, domain=[('deprecated', '=', False)])
     dst_interco_ap_account_id = fields.Many2one("account.account", string="Dest Interco AP (Verbindlichkeiten)", required=True, domain=[('deprecated', '=', False)])
     dst_journal_id = fields.Many2one("account.journal", string="Dest Journal", domain=[('type', 'in', ['general', 'bank', 'cash'])])

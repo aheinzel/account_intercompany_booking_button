@@ -10,14 +10,17 @@ class AccountBankStatementLine(models.Model):
         column1="statement_line_id",
         column2="move_id",
         string="Intercompany Moves",
-        help="Moves that were generated via the Inter-co Allocate action.",
         copy=False,
     )
+    interco_move_count = fields.Integer(string="Interco Move Count", compute="_compute_interco_move_count")
+
+    def _compute_interco_move_count(self):
+        for rec in self:
+            rec.interco_move_count = len(rec.interco_move_ids)
 
     def action_open_interco_allocate_wizard(self):
         self.ensure_one()
-        # Reconcile view can be opened on posted/unreconciled items only, but keep safety
-        if getattr(self, 'state', False) == 'reconciled':
+        if getattr(self, 'is_reconciled', False):
             raise UserError(_("This statement line is already reconciled."))
         return {
             'name': _('Inter-co allocate'),
@@ -30,4 +33,15 @@ class AccountBankStatementLine(models.Model):
                 'default_amount': abs(getattr(self, 'amount', 0.0) or getattr(self, 'balance', 0.0)),
                 'default_currency_id': self.currency_id.id or self.journal_id.currency_id.id or self.company_id.currency_id.id,
             },
+        }
+
+    def action_view_interco_moves(self):
+        self.ensure_one()
+        return {
+            'name': _("Journal Entries"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', self.interco_move_ids.ids)],
+            'context': {'default_journal_id': self.journal_id.id},
         }
