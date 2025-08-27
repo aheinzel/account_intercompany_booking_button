@@ -2,7 +2,7 @@
     <record id="res_config_settings_view_form_interco_quick" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.interco.quick</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.view_res_config_settings"/>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[contains(@class, 'o_setting_container')]" position="inside">
                 <div class="o_setting">
