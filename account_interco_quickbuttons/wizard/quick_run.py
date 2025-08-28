@@ -51,7 +51,7 @@ class IntercoQuickRun(models.TransientModel):
 
     template = fields.Selection([('food','Food/Groceries'),('child','Childcare')], required=False)
     ref = fields.Char(string="Reference")
-    statement_line_id = fields.Many2one('account.bank.statement.line', ondelete='set null', required=True)
+    statement_line_id = fields.Many2one('account.bank.statement.line', ondelete='set null', required=False)
 
     def _find_account_by_code(self, company, code):
         return self.env['account.account'].search([('code','=',code),('company_id','=',company.id)], limit=1)
