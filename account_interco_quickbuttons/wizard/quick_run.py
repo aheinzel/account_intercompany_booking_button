@@ -3,6 +3,36 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
 class IntercoQuickRun(models.TransientModel):
+
+    @api.model
+    def default_get(self, fields_list):
+        vals = super().default_get(fields_list)
+        sl_id = vals.get('statement_line_id')
+        if sl_id:
+            if not self.env['account.bank.statement.line'].browse(sl_id).exists():
+                vals['statement_line_id'] = False
+        return vals
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        ABSL = self.env['account.bank.statement.line']
+        for vals in vals_list:
+            sl_id = vals.get('statement_line_id')
+            if sl_id and not ABSL.browse(sl_id).exists():
+                vals['statement_line_id'] = False
+        return super().create(vals_list)
+
+    @api.onchange('statement_line_id')
+    def _onchange_statement_line_id(self):
+        if self.statement_line_id and not self.statement_line_id.exists():
+            self.statement_line_id = False
+            return {
+                'warning': {
+                    'title': _('Statement line not found'),
+                    'message': _('The selected bank statement line no longer exists and was cleared.')
+                }
+            }
+        return {}
     _name = 'interco.quick.run'
     _description = 'Run predefined intercompany booking'
 
