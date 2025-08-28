@@ -1,6 +1,6 @@
 {
     'name': 'Account Interco Quick Buttons',
-    'version': '18.0.0.4.21',
+    'version': '18.0.0.4.22',
     'category': 'Accounting',
     'summary': 'Quick fixed intercompany postings (Food/Childcare)',
     'depends': ['account'],
