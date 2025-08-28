@@ -5,7 +5,7 @@
     <field name="inherit_id" ref="account.view_move_form"/>
     <field name="arch" type="xml">
       <xpath expr="//form/header" position="inside">
-        <button name="%(action_open_interco_quick_wizard)d"
+        <button name="%(action_open_interco_quick_wizard_move_bind)d"
                 type="action"
                 string="Quick interco booking"
                 class="oe_highlight"
