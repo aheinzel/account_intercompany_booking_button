@@ -7,7 +7,7 @@
         <group>
           <field name="template"/>
           <field name="ref"/>
-          <field name="statement_line_id" invisible="1"/>
+          <field name="statement_line_id" invisible="1"/ required="1">
         </group>
         <footer>
           <button string="Post Entries" type="object" name="action_run" class="btn-primary"/>
