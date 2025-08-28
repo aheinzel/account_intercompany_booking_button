@@ -14,6 +14,13 @@ class IntercoQuickRun(models.TransientModel):
         return self.env['account.account'].search([('code','=',code),('company_id','=',company.id)], limit=1)
 
     def action_run(self):
+
+    self.ensure_one()
+    st_line = self.statement_line_id
+    if not st_line or not st_line.exists():
+        from odoo.exceptions import UserError
+        from odoo.tools.translate import _
+        raise UserError(_("The linked bank statement line no longer exists. Please reopen the wizard from an existing line."))
         st_line = self.statement_line_id
         src_company = st_line.company_id
         dst_company = self.env['res.company'].search([('name','ilike','Household')], limit=1)

@@ -9,7 +9,8 @@
         'security/ir.model.access.csv',
         'views/settings_view.xml',
                 'views/wizard_views.xml',
-        'views/move_form_view.xml',
+        'views/move_form_view.xml',,
+        'views/statement_line_view.xml'
     ],
     'installable': True,
     'application': False,
@@ -20,8 +21,9 @@
         ],
     }
 ,
-    'post_init_hook': 'post_init_hook'
+    
 ,
-    'pre_init_hook': 'pre_init_hook',
+    'pre_init_hook': 'pre_init_hook'
+,
     'post_init_hook': 'post_init_hook'
 }
