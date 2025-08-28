@@ -8,8 +8,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/settings_view.xml',
-                'views/wizard_views.xml',
-        'views/move_form_view.xml',,
+        'views/wizard_views.xml',
+        'views/move_form_view.xml',
         'views/statement_line_view.xml'
     ],
     'installable': True,
@@ -18,8 +18,8 @@
     'assets': {
         'web.assets_backend': [
             'account_interco_quickbuttons/static/src/js/reconcile_quickbutton.js',
-        ],
-    }
+        ]
+}
 ,
     
 ,
