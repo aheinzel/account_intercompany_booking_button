@@ -7,33 +7,13 @@
         <group>
           <field name="template"/>
           <field name="ref"/>
-          <field name="statement_line_id" invisible="1"/ required="1">
+          <field name="statement_line_id" required="1"/>
         </group>
         <footer>
-          <button string="Post Entries" type="object" name="action_run" class="btn-primary"/>
+          <button name="action_run" type="object" string="Post Entries" class="btn-primary"/>
           <button string="Cancel" special="cancel"/>
         </footer>
       </form>
     </field>
-  </record>
-
-  <record id="action_open_interco_quick_wizard" model="ir.actions.act_window">
-    <field name="name">Quick Interco Booking</field>
-    <field name="res_model">interco.quick.run</field>
-    <field name="view_mode">form</field>
-    <field name="target">new</field>
-    <field name="binding_model_id" ref="account.model_account_bank_statement_line"/>
-    <field name="binding_type">action</field>
-    <field name="context">{'default_statement_line_id': active_id}</field>
-  </record>
-
-  <record id="action_open_interco_quick_wizard_move_bind" model="ir.actions.act_window">
-    <field name="name">Quick Interco Booking</field>
-    <field name="res_model">interco.quick.run</field>
-    <field name="view_mode">form</field>
-    <field name="target">new</field>
-    <field name="binding_model_id" ref="account.model_account_move"/>
-    <field name="binding_type">action</field>
-    <field name="context">{'default_statement_line_id': active_id}</field>
   </record>
 </odoo>
