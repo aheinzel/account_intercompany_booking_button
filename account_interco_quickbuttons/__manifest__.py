@@ -1,7 +1,6 @@
-
 {
     'name': 'Account Interco Quick Buttons',
-    'version': '18.0.0.4.8',
+    'version': '18.0.0.4.12',
     'category': 'Accounting',
     'summary': 'Quick fixed intercompany postings (Food/Childcare)',
     'depends': ['account'],
@@ -10,20 +9,18 @@
         'views/settings_view.xml',
         'views/wizard_views.xml',
         'views/move_form_view.xml',
-        'views/statement_line_view.xml'
+        'views/statement_line_view.xml',
     ],
     'installable': True,
     'application': False,
-    'license': 'LGPL-3', 
-    'assets': {
-        'web.assets_backend': [
-            'account_interco_quickbuttons/static/src/js/reconcile_quickbutton.js',
-        ]
-}
-,
-    
-,
-    'pre_init_hook': 'pre_init_hook'
-,
-    'post_init_hook': 'post_init_hook'
+    'license': 'LGPL-3',
+
+'assets': {
+    'web.assets_backend': [
+        'account_interco_quickbuttons/static/src/js/reconcile_quickbutton.js',
+    ],
+},
+
+    'pre_init_hook': 'pre_init_hook',
+    'post_init_hook': 'post_init_hook',
 }
