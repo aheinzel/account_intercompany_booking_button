@@ -22,7 +22,7 @@ This is the first iteration starting from a non GPT-5 produced PoC. We started f
   - The selector only lists scenarios whose source company matches the statement line's company.
   - Each scenario stores: source/destination companies, journals, and debit/credit accounts.
 - Amount = `abs(statement_line.amount)`; Date = statement line date (or today).
-- Creates two minimal moves (2 lines each), one per company.
+- Creates and posts two minimal moves (2 lines each), one per company.
 - Optional: upload a file in the wizard to attach it to both created journal entries.
 
 Note: Scenario values live in `intercompany.scenario` and are read by the wizard during `action_confirm`.
@@ -49,7 +49,7 @@ Note: Scenario values live in `intercompany.scenario` and are read by the wizard
 1. Go to Accounting -> Reconcile and open a Bank Statement Line in the OCA reconcile form.
 2. Click "Intercompany" in the header/statusbar.
 3. In the wizard, pick a scenario (filtered to the statement line's company), optionally type a reference, and optionally upload a file to attach.
-4. Confirm. The module creates two 2-line journal entries using the selected scenario and the amount from the selected line; the uploaded file is attached to both moves.
+4. Confirm. The module creates and posts two 2-line journal entries using the selected scenario and the amount from the selected line; the uploaded file is attached to both moves.
 
 ## Configuration
 

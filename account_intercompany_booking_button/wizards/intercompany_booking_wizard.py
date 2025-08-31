@@ -116,6 +116,10 @@ class IntercompanyBookingWizard(models.TransientModel):
             True,
         )
 
+        # Post both moves (mark as booked)
+        source_company_move.with_company(scenario.source_company_id).action_post()
+        destination_company_move.with_company(scenario.dest_company_id).action_post()
+
         # Attach uploaded file to both moves, if provided
         if self.file_data:
             attach_vals_common = {
