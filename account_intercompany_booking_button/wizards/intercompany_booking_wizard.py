@@ -134,6 +134,12 @@ class IntercompanyBookingWizard(models.TransientModel):
                 vals.update({'res_id': move.id, 'company_id': move.company_id.id})
                 self.env['ir.attachment'].create(vals)
 
+        # Post bank statement description into chatter of both moves (payment_ref only)
+        if line and line.payment_ref:
+            body = f"Bank statement description: {line.payment_ref}"
+            for move in (source_company_move, destination_company_move):
+                move.message_post(body=body)
+
         _logger.info("src move %s", source_company_move)
         _logger.info("dst move %s", destination_company_move)
 
