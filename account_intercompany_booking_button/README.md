@@ -18,8 +18,8 @@ This is the first iteration starting from a non GPT-5 produced PoC. We started f
 - Adds an **Intercompany** button to the **OCA Bank Statement Line** reconcile form (`account_reconcile_oca.bank_statement_line_form_reconcile_view`).
 - Opens a wizard model: `intercompany.booking.wizard`.
 - Uses a central configuration model: `intercompany.scenario`.
-  - Exactly one active scenario is allowed (enforced by a constraint).
-  - The wizard uses that active scenario automatically (no selector yet).
+  - Multiple scenarios can be active; the wizard lets you select one.
+  - The selector only lists scenarios whose source company matches the statement line's company.
   - Each scenario stores: source/destination companies, journals, and debit/credit accounts.
 - Amount = `abs(statement_line.amount)`; Date = statement line date (or today).
 - Creates two minimal moves (2 lines each), one per company.
@@ -54,11 +54,12 @@ Note: Scenario values live in `intercompany.scenario` and are read by the wizard
 
 - Menu: Accounting -> Configuration -> Intercompany -> Intercompany Scenarios.
 - Create scenario records with the desired companies, journals and accounts.
-- Exactly one scenario must be active at a time (enforced). In the action, archived (inactive) records are visible by default.
+- You may have multiple active scenarios. In the wizard, choose the desired scenario. The list is filtered to the bank statement line's company (as source).
+  In the action, archived (inactive) records are visible by default.
 
 ## Known Limitations
 
-- Wizard auto-picks the single active scenario (no selector yet).
+- Wizard requires a scenario selection (defaults to the first active scenario for the line's company when possible).
 - No currency conversion, taxes, analytic, or multi-line logic.
 - No automatic reconciliation; it just posts minimal moves.
 - Minimal access control (transient wizard access only).

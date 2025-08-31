@@ -4,7 +4,10 @@
     <field name="model">intercompany.booking.wizard</field>
     <field name="arch" type="xml">
       <form>
-        <field name="reference" widget="text" placeholder="Reference value ..."/>
+        <group>
+          <field name="scenario_id" domain="[('active', '=', True)]"/>
+          <field name="reference" widget="text" placeholder="Reference value ..."/>
+        </group>
         <footer>
           <button string="Confirm"
                   name="action_confirm"

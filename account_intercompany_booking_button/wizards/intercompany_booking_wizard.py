@@ -1,5 +1,5 @@
 import logging
-from odoo import models, fields, _
+from odoo import models, fields, _, api
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -12,6 +12,12 @@ class IntercompanyBookingWizard(models.TransientModel):
         string="Bank Statement Line",
         ondelete='set null',
         required=False,
+    )
+
+    scenario_id = fields.Many2one(
+        'intercompany.scenario',
+        string="Scenario",
+        required=True,
     )
 
     reference = fields.Char(string="Reference", required=True)
@@ -39,17 +45,41 @@ class IntercompanyBookingWizard(models.TransientModel):
 
 
 
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        line_id = self.env.context.get('default_statement_line_id')
+        if line_id and 'scenario_id' in fields_list:
+            line = self.env['account.bank.statement.line'].browse(line_id)
+            scenario = self.env['intercompany.scenario'].search([
+                ('active', '=', True),
+                ('source_company_id', '=', line.company_id.id),
+            ], limit=1)
+            if scenario:
+                res['scenario_id'] = scenario.id
+        return res
+
+
+    @api.onchange('statement_line_id')
+    def _onchange_statement_line_id(self):
+        domain = [('active', '=', True)]
+        if self.statement_line_id:
+            domain.append(('source_company_id', '=', self.statement_line_id.company_id.id))
+        return {'domain': {'scenario_id': domain}}
+
+
     def action_confirm(self):
         _logger.info("Intercompany booking: confirm")
         self.ensure_one()
         line = self.statement_line_id
 
-        scenarios = self.env["intercompany.scenario"].search([("active", "=", True)])
-        if not scenarios:
-            raise UserError(_("No active Intercompany Scenario configured. Please create one."))
-        if len(scenarios) > 1:
-            raise UserError(_("Multiple active Intercompany Scenarios detected. Please keep exactly one active scenario."))
-        scenario = scenarios[0]
+        if not self.scenario_id:
+            raise UserError(_("Please select an Intercompany Scenario."))
+        scenario = self.scenario_id
+        if not scenario.active:
+            raise UserError(_("Selected scenario is archived. Please choose an active scenario."))
+        if line and scenario.source_company_id != line.company_id:
+            raise UserError(_("Selected scenario's source company does not match the bank statement line company."))
 
         signed_amt = line.amount or 0.0
         if signed_amt == 0.0:

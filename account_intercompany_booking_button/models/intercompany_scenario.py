@@ -1,5 +1,4 @@
-from odoo import models, fields, api
-from odoo.exceptions import ValidationError
+from odoo import models, fields
 
 
 class IntercompanyScenario(models.Model):
@@ -52,13 +51,4 @@ class IntercompanyScenario(models.Model):
         required=True,
     )
 
-    @api.constrains("active")
-    def _check_single_active(self):
-        for rec in self:
-            if rec.active:
-                count = self.search_count([("active", "=", True), ("id", "!=", rec.id)])
-                if count:
-                    raise ValidationError(
-                        "Only one Intercompany Scenario can be active at a time. "
-                        "Please deactivate other scenarios first."
-                    )
+    # Multiple active scenarios are allowed; selection happens in the wizard.
