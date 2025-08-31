@@ -1,2 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_interco_quick_run,access.interco.quick.run,model_interco_quick_run,base.group_user,1,1,1,1

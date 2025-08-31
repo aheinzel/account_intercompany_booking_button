@@ -1,0 +1,15 @@
+<odoo>
+  <record id="account_bank_statement_line_intercompany_booking_view" model="ir.ui.view">
+    <field name="name">account.bank.statement.line.intercompany.booking</field>
+    <field name="model">account.bank.statement.line</field>
+    <field name="inherit_id" ref="account_reconcile_oca.bank_statement_line_form_reconcile_view"/>
+    <field name="arch" type="xml">
+      <xpath expr="//*[@class = 'o_statusbar_buttons']" position="inside">
+        <button name="action_open_intercompany_booking_wizard"
+                type="object"
+                string="Intercompany"
+                class="oe_highlight"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>
