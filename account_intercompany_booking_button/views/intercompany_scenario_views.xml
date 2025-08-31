@@ -1,0 +1,72 @@
+<odoo>
+  <record id="view_intercompany_scenario_tree" model="ir.ui.view">
+    <field name="name">intercompany.scenario.list</field>
+    <field name="model">intercompany.scenario</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <field name="active"/>
+        <field name="source_company_id"/>
+        <field name="dest_company_id"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="view_intercompany_scenario_form" model="ir.ui.view">
+    <field name="name">intercompany.scenario.form</field>
+    <field name="model">intercompany.scenario</field>
+    <field name="arch" type="xml">
+      <form string="Intercompany Scenario">
+        <sheet>
+          <group>
+            <group>
+              <field name="name"/>
+              <field name="active"/>
+            </group>
+            <group>
+              <field name="source_company_id"/>
+              <field name="dest_company_id"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Source">
+              <group>
+                <field name="source_journal_id" domain="[('company_id', '=', source_company_id)]"/>
+                <field name="source_debit_account_id" domain="[('company_ids', 'in', [source_company_id]), ('deprecated', '=', False)]"/>
+                <field name="source_credit_account_id" domain="[('company_ids', 'in', [source_company_id]), ('deprecated', '=', False)]"/>
+              </group>
+            </page>
+            <page string="Destination">
+              <group>
+                <field name="dest_journal_id" domain="[('company_id', '=', dest_company_id)]"/>
+                <field name="dest_debit_account_id" domain="[('company_ids', 'in', [dest_company_id]), ('deprecated', '=', False)]"/>
+                <field name="dest_credit_account_id" domain="[('company_ids', 'in', [dest_company_id]), ('deprecated', '=', False)]"/>
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Optional action (no menu to avoid fragile XMLIDs) -->
+  <record id="action_intercompany_scenario" model="ir.actions.act_window">
+    <field name="name">Intercompany Scenarios</field>
+    <field name="res_model">intercompany.scenario</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{"active_test": False}</field>
+  </record>
+
+  <!-- Menu entry under Invoicing/Accounting -> Configuration -->
+  <!-- Group header to separate our settings in the dropdown -->
+  <menuitem id="menu_intercompany_group"
+            name="Intercompany"
+            parent="account.menu_finance_configuration"
+            sequence="330"/>
+
+  <menuitem id="menu_intercompany_scenarios"
+            name="Intercompany Scenarios"
+            parent="account_intercompany_booking_button.menu_intercompany_group"
+            action="account_intercompany_booking_button.action_intercompany_scenario"
+            sequence="10"/>
+</odoo>

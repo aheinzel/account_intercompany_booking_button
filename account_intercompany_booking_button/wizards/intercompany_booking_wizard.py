@@ -1,5 +1,6 @@
 import logging
-from odoo import models, fields
+from odoo import models, fields, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -15,25 +16,6 @@ class IntercompanyBookingWizard(models.TransientModel):
 
     reference = fields.Char(string="Reference", required=True)
 
-
-    def _find_company_by_name(self, name):
-        return self.env['res.company'].search([
-            ('name', 'ilike', name)
-        ], limit=1)
-
-    def _find_account_by_code(self, company, code):
-        return self.env['account.account'].search([
-            ('company_ids', '=', company.id),
-            ('code', '=', code)
-        ], limit=1)
-
-    def _find_journal_by_code(self, company, code):
-        _logger.info("journal search: %s", ('company_id', '=', company.id))
-        _logger.info("journal search: %s", ('code' '=', code))
-        return self.env['account.journal'].search([
-            ('company_id', '=', company.id),
-            ('code', '=', code)
-        ], limit=1)
 
     def _build_two_line_move(self, company, journal, date, label, debit_account, credit_account, amount, clean_context = False):
         context = self.env.context
@@ -58,20 +40,16 @@ class IntercompanyBookingWizard(models.TransientModel):
 
 
     def action_confirm(self):
-        _logger.info("run")
+        _logger.info("Intercompany booking: confirm")
+        self.ensure_one()
         line = self.statement_line_id
-        source_company = self._find_company_by_name("Andreas")
-        source_company_credit_account = self._find_account_by_code(source_company, 10000)
-        source_company_debit_account = self._find_account_by_code(source_company, 2228)
 
-        destination_company = self._find_company_by_name("Haushalt")
-        destination_company_credit_account = self._find_account_by_code(destination_company, 3328)
-        destination_company_debit_account = self._find_account_by_code(destination_company, "0000")
-
-        _logger.info("source_company_credit_account: %s", source_company_credit_account)
-        _logger.info("source_company_debit_account: %s", source_company_debit_account)
-        _logger.info("destination_company_credit_account: %s", destination_company_credit_account)
-        _logger.info("destination_company_debit_account: %s", destination_company_debit_account)
+        scenarios = self.env["intercompany.scenario"].search([("active", "=", True)])
+        if not scenarios:
+            raise UserError(_("No active Intercompany Scenario configured. Please create one."))
+        if len(scenarios) > 1:
+            raise UserError(_("Multiple active Intercompany Scenarios detected. Please keep exactly one active scenario."))
+        scenario = scenarios[0]
 
         signed_amt = line.amount or 0.0
         if signed_amt == 0.0:
@@ -81,24 +59,28 @@ class IntercompanyBookingWizard(models.TransientModel):
         date = line.date or fields.Date.context_today(self)
         label = self.reference
 
-        # Pick journals (adapt preferred_code/jtype to your setup)
-        source_company_journal = self._find_journal_by_code(source_company, 'MISC')
-        destination_company_journal = self._find_journal_by_code(destination_company, 'MISC')
-
-
-        # Create posted moves
+        # Create posted moves from scenario
         source_company_move = self._build_two_line_move(
-             source_company, source_company_journal, 
-             date, label, source_company_debit_account, source_company_credit_account, amt,
-             True
+            scenario.source_company_id,
+            scenario.source_journal_id,
+            date,
+            label,
+            scenario.source_debit_account_id,
+            scenario.source_credit_account_id,
+            amt,
+            True,
         )
 
         destination_company_move = self._build_two_line_move(
-             destination_company, destination_company_journal, 
-             date, label, destination_company_debit_account, destination_company_credit_account, amt,
-             True
+            scenario.dest_company_id,
+            scenario.dest_journal_id,
+            date,
+            label,
+            scenario.dest_debit_account_id,
+            scenario.dest_credit_account_id,
+            amt,
+            True,
         )
-
 
         _logger.info("src move %s", source_company_move)
         _logger.info("dst move %s", destination_company_move)
