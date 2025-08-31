@@ -1,0 +1,84 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.env.*
+.venv/
+venv/
+ENV/
+env/
+.conda/
+
+# Unit test / coverage
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+
+# Logs
+*.log
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+.vim/
+*.swp
+*.swo
+.ropeproject/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Type checking / linters
+.mypy_cache/
+.pytype/
+.pylint.d/
+.ruff_cache/
+
+# Odoo-specific
+*.mo
+
+# Node / JS (if ever introduced)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Misc
+*.orig
