@@ -8,6 +8,10 @@
           <field name="scenario_id" domain="[('active', '=', True)]"/>
           <field name="reference" widget="text" placeholder="Reference value ..."/>
         </group>
+        <group string="Attachment (optional)">
+          <field name="file_data" filename="file_name"/>
+          <field name="file_name"/>
+        </group>
         <footer>
           <button string="Confirm"
                   name="action_confirm"

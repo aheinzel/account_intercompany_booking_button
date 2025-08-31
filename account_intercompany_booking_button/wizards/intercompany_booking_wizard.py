@@ -22,6 +22,10 @@ class IntercompanyBookingWizard(models.TransientModel):
 
     reference = fields.Char(string="Reference", required=True)
 
+    file_data = fields.Binary(string="Attachment")
+    file_name = fields.Char(string="Filename")
+    file_mimetype = fields.Char(string="MIME Type")
+
 
     def _build_two_line_move(self, company, journal, date, label, debit_account, credit_account, amount, clean_context = False):
         context = self.env.context
@@ -111,6 +115,20 @@ class IntercompanyBookingWizard(models.TransientModel):
             amt,
             True,
         )
+
+        # Attach uploaded file to both moves, if provided
+        if self.file_data:
+            attach_vals_common = {
+                'name': self.file_name or 'attachment',
+                'datas': self.file_data,
+                'type': 'binary',
+                'mimetype': self.file_mimetype or None,
+                'res_model': 'account.move',
+            }
+            for move in (source_company_move, destination_company_move):
+                vals = dict(attach_vals_common)
+                vals.update({'res_id': move.id, 'company_id': move.company_id.id})
+                self.env['ir.attachment'].create(vals)
 
         _logger.info("src move %s", source_company_move)
         _logger.info("dst move %s", destination_company_move)
