@@ -26,6 +26,46 @@ class IntercompanyBookingWizard(models.TransientModel):
     file_name = fields.Char(string="Filename")
     file_mimetype = fields.Char(string="MIME Type")
 
+    reconcile_now = fields.Boolean(string="Reconcile now", default=True)
+
+    # Helper: get Outstanding Payments accounts configured on outbound payment methods
+    def _get_outstanding_payment_accounts(self, journal):
+        outbound_lines = journal.outbound_payment_method_line_ids  # empty recordset if none
+        return {ml.payment_account_id.id for ml in outbound_lines if ml.payment_account_id}
+
+    # Helper: ensure reconciliation preconditions; return (st_line_in_src_company, outstanding_account_id)
+    def _ensure_reconcile_preconditions(self, line, scenario):
+        if not line:
+            raise UserError(_("Intercompany: No bank statement line provided for reconciliation."))
+        if not hasattr(line, '_add_account_move_line'):
+            raise UserError(_("Intercompany: OCA reconciliation engine not available on statement line (account_reconcile_oca missing?)."))
+
+        st = line.with_company(scenario.source_company_id)
+        outstanding_accounts = self._get_outstanding_payment_accounts(st.journal_id)
+        if not outstanding_accounts:
+            raise UserError(_("Intercompany: Bank journal has no Outstanding Payments account configured on outbound payment methods."))
+        if scenario.source_credit_account_id.id not in outstanding_accounts:
+            raise UserError(_(
+                "Intercompany: Scenario must credit one of the journal's Outstanding Payments accounts configured on outbound methods."
+            ))
+        if not st.move_id:
+            raise UserError(_("Intercompany: Bank statement line has no posted move yet."))
+        unreconciled = st.move_id.line_ids.filtered(lambda ml: not ml.reconciled and ml.account_id.reconcile)
+        if not unreconciled:
+            raise UserError(_("Intercompany: Nothing left to reconcile on the bank statement line."))
+        return st, scenario.source_credit_account_id.id
+
+    # Helper: pick created move line matching given account id and unreconciled
+    def _find_target_move_line(self, move, account_id):
+        target_ml = move.line_ids.filtered(lambda ml: ml.account_id.id == account_id and not ml.reconciled)
+        if not target_ml:
+            raise UserError(_(
+                "Intercompany: Created source move has no unreconciled line on the Outstanding Payments account configured in the scenario."
+            ))
+        return target_ml[0]
+
+    # (removed) _is_reconcile_default: no longer used since we allow existing selections
+
 
     def _build_two_line_move(self, company, journal, date, label, debit_account, credit_account, amount, clean_context = False):
         context = self.env.context
@@ -76,6 +116,8 @@ class IntercompanyBookingWizard(models.TransientModel):
         _logger.info("Intercompany booking: confirm")
         self.ensure_one()
         line = self.statement_line_id
+        if not line:
+            raise UserError(_("Please open the wizard from a Bank Statement Line."))
 
         if not self.scenario_id:
             raise UserError(_("Please select an Intercompany Scenario."))
@@ -84,6 +126,10 @@ class IntercompanyBookingWizard(models.TransientModel):
             raise UserError(_("Selected scenario is archived. Please choose an active scenario."))
         if line and scenario.source_company_id != line.company_id:
             raise UserError(_("Selected scenario's source company does not match the bank statement line company."))
+
+        # Pre-check reconciliation preconditions early (if enabled)
+        if self.reconcile_now:
+            st, op_account_id = self._ensure_reconcile_preconditions(line, scenario)
 
         signed_amt = line.amount or 0.0
         if signed_amt == 0.0:
@@ -142,5 +188,17 @@ class IntercompanyBookingWizard(models.TransientModel):
 
         _logger.info("src move %s", source_company_move)
         _logger.info("dst move %s", destination_company_move)
+
+        # Deterministic reconciliation via OCA engine (optional)
+        if self.reconcile_now:
+            st, op_account_id = self._ensure_reconcile_preconditions(line, scenario)
+            target_ml = self._find_target_move_line(source_company_move, op_account_id)
+            try:
+                # Only pre-populate the reconcile view with our counterpart line.
+                # Do NOT validate/apply automatically; the user will hit Validate in the UI.
+                st._add_account_move_line(target_ml, keep_current=True)
+                _logger.info("ICB: Added counterpart line %s to statement line %s. Validation must be done by the user.", target_ml.id, st.id)
+            except Exception as e:
+                raise UserError(_("Intercompany: Auto-reconcile preparation failed: %s") % e)
 
         return {"type": "ir.actions.act_window_close"}

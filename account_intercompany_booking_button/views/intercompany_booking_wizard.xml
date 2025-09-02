@@ -7,6 +7,7 @@
         <group>
           <field name="scenario_id" domain="[('active', '=', True)]"/>
           <field name="reference" widget="text" placeholder="Reference value ..."/>
+          <field name="reconcile_now"/>
         </group>
         <group string="Attachment (optional)">
           <field name="file_data" filename="file_name"/>

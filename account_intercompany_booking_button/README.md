@@ -25,6 +25,7 @@ This is the first iteration starting from a non GPT-5 produced PoC. We started f
 - Creates and posts two minimal moves (2 lines each), one per company.
 - Optional: upload a file in the wizard to attach it to both created journal entries.
 - Posts the bank statement payment reference into the chatter of both moves, prefixed with "Bank statement description:".
+- Optional reconciliation: If enabled (default), and the bank journal uses Keep Suspense Accounts, the wizard pre‑adds the created source move line (on the bank journal's Outstanding Payments account) to the statement line in the reconcile view. It does not auto‑validate; the user confirms reconciliation in the UI. Existing selections on the statement line are allowed; we only require that there is still something unreconciled.
 
 Note: Scenario values live in `intercompany.scenario` and are read by the wizard during `action_confirm`.
 
@@ -51,6 +52,7 @@ Note: Scenario values live in `intercompany.scenario` and are read by the wizard
 2. Click "Intercompany" in the header/statusbar.
 3. In the wizard, pick a scenario (filtered to the statement line's company), optionally type a reference, and optionally upload a file to attach.
 4. Confirm. The module creates and posts two 2-line journal entries using the selected scenario and the amount from the selected line; the uploaded file is attached to both moves, and the payment reference is logged in each move's chatter.
+   If "Reconcile now" is checked, it pre‑adds the created source move line to the statement line (Keep Suspense Accounts required). You must click Validate in the reconcile UI to finalize.
 
 ## Configuration
 
@@ -58,6 +60,7 @@ Note: Scenario values live in `intercompany.scenario` and are read by the wizard
 - Create scenario records with the desired companies, journals and accounts.
 - You may have multiple active scenarios. In the wizard, choose the desired scenario. The list is filtered to the bank statement line's company (as source).
   In the action, archived (inactive) records are visible by default.
+ - Reconciliation (optional): requires that the bank journal has a reconcilable suspense account and the scenario credits that same account in the source company; the wizard refuses if the statement line already has pending counterpart lines selected.
 
 ## Known Limitations
 
